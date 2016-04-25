@@ -1,0 +1,43 @@
+\chapter{Lab 21: Cisco Catalyst -- VLAN, VTP}
+
+\section{Konfiguracja}
+
+\cmdc{config}{no ip domain-lookup}{wyłączenie rozwiązywania nazw DNS}
+\subsection{Ogólne}
+\cmdc{config-if}{swichport nonegotiate}{Wyłączenie autonegocjacji}
+\cmdc{config}{interface range \textit{nazwa\_interfejsu}/\textit{gniazdo\_pierwsze} - \textit{gniazdo\_ostatnie}}{Wejście w tryb konfiguracji wielu portów jednocześnie (zakresu)}
+
+\subsection{VLAN}
+Domyślnie port znajduje się w trybie \texttt{dynamic} czyli adaptuje się do portu po drugiej stronie.
+
+\subsubsection{Konfiguracja}
+\cmdc{config-if}{switchport mode \{access,trunk,dynamic\}}{zmiana trybu pracy przełącznika (dynamic - uzgadniany z drugą stroną)}
+\cmdc{config}{vlan \textit{numer\_vlan}}{tworzenie nowego vlanu}
+\cmdc{config-if}{switchport access vlan \textit{numer\_vlan}}{przypisanie pojedynczego portu do vlan}
+\cmdc{config-if}{switchport trunk encapsulation dot1q}{ustawienie trybu enkapsulacji vlanów na 802.1q}
+\cmdc{config-if}{switchport trunk native vlan \textit{numer\_vlan}}{ustawianie natywnego VLAN}
+\cmdc{config-if}{switchport trunk allowed vlan \textit{pierwszy\_vlan}-\textit{ostatni\_vlan}}{Zezwolenie na przesyłanie wybranych vlanów przez port trunk}
+\cmdc{config-if}{switchport trunk allowed vlan remove 10}{Usunięcie wybranego VLAN z trunku}
+
+\subsubsection{Diagnostyka}
+\cmde{show interface trunk}{??}
+\cmde{show interface \textit{nazwa\_interfejsu} switchport}{??}
+\cmde{show interface \textit{nazwa\_interfejsu} status}{??}
+\cmde{vlan database}{??}
+
+\subsection{VTP (\textit{Virtual Trunking Protocol})}
+VTP pracuje w trzech trybach:
+\begin{itemize}
+	\item client -- konfiguracja pobierana jest z serwera oraz przekazywana dalej w sieć
+    \item server -- utworzone na tym urządzeniu VLAN-y są propagowane do switchów pracujących w trybie VTP client
+    \item transparent -- konfiguracja jest przesyłana dalej, bez interpretacji na urządzeniu
+\end{itemize}
+
+\subsubsection{Konfiguracja}
+\cmdc{config}{vtp domain \textit{nazwa\_domeny}}{Ustawienie domeny VTP (musi byc zgodna na wszytkich switchach)}
+\cmdc{config}{vtp password \textit{hasło}}{Ustawienie hasła na VTP (wymagana zgodność na wszystkich switchach)}
+\cmdc{config}{vtp mode \{client,server,transparent\}}{Ustawienie trybu pracy VTP}
+
+\subsubsection{Diagnostyka}
+\cmde{show vtp status}{Wyświetlenie informacji o stanie VTP}
+\cmde{debug sw-vlan vtp events}{Uruchomienie debugowania VTP}
