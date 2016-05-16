@@ -1,0 +1,119 @@
+\chapter{Lab 22: Cisco Catalyst -- \texttt{telnet}, SSH, STP, EtherChannel}
+
+\section{Konfiguracja dostępu zdalnego}
+Najczęściej w urządzeniach znajduje się 16 (0 -- 15) terminali wirtualnych VTY. \newline Dostęp do trybu \texttt{enable} zdalnie jest możliwe jedynie po uprzednim zabezpieczeniu wejścia do trybu hasłem.
+\cmdc{config}{line vty \textit{pierwsze\_vty} \textit{ostatnie\_vty}}{Wejście w tryb konfiguracji VTY}
+
+\subsection{Konfiguracja \texttt{telnet}}
+Usługę uruchamiamy na konkretnych liniach VTY (wejście do trybu \texttt{config-line} i konfiguracja opisane są powyżej). \newline
+\texttt{telnet} pracuje na porcie 23 TCP.
+
+\cmdc{config-line}{password \textit{hasło}}{Ustawienie lokalnego hasła dla wybranych linii VTY}
+\cmdc{config-line}{login}{Ustanowienie nakazu używania lokalnego hasła przy logowaniu}
+(nie działa? -- patrz: wyłączanie autoryzacji new-model)
+\cmdc{config}{no aaa new-model}{Wyłączenie trybu autoryzacji typu new-model}
+\cmdc{config-line}{transport input telnet}{Zezwolenie na ruch \texttt{telnet} z wykorzystaniem wybranych linii}
+
+\subsection{Konfiguracja SSH}
+Usługę uruchamiamy na konkretnych liniach VTY (wejście do trybu \texttt{config-line} i konfiguracja opisane są powyżej) za pomocą ostatniego polecenia. \newline
+Konieczne jest wcześniejsze ustawienie nazwy domeny, wygenerowanie klucza oraz zdefiniowanie użytkownika (polecenia poniżej).
+
+\cmdc{config}{ip domain-name \textit{domena}}{Konfiguracja domeny}.
+\cmdc{config}{crypto key generate rsa}{Generowanie klucza RSA o zadanej długości} (pytanie o długość klucza pojawia się interaktywnie)
+\cmdc{config}{username \textit{nazwa\_użytkownika} priv \textit{priorytet\_użytkownika} password \textit{typ\_hasła} \textit{hasło}}{Definiowanie nowego użytkownika, gdzie: \textit{priorytet\_użytkownika} - wartość 15 jest najwyższa; \textit{typ\_hasła} - kod 0 oznacza hasło zadane jawnym tekstem, kod 7 - hasło szyfrowane}
+\cmdc{config}{aaa new-model}{Pozwolenie na wykorzystanie lokalnego systemu kont (nie jest możliwe logowanie za pomocą hasła przypisanego do linii VTY)}
+\cmdc{config-line}{transport input ssh}{Zezwolenie na ruch \texttt{telnet} z wykorzystaniem wybranych linii}
+
+\subsubsection{Diagnostyka}
+\cmde{show ip ssh}{Sprawdzenie konfiguracji SSH}
+
+\subsubsection{Uwagi i problemy}
+\begin{itemize}
+	\item Logowanie przez SSH działa w trybie \texttt{aaa new-model}, zatem polecenie \texttt{login} przestaje działać.
+	\item Ustawienie długości klucza poniżej 512 bitów może powodować problemy podczas logowania (PuTTY odmawia logowania z powodu zbyt krótkiego klucza).
+\end{itemize}
+
+\subsection{Zarządzanie dostępem do linii VTY za pomocą ACL}
+Dostęp do linii może być zarządzany poprzez przypisanie listy ACL (standardowej, rozszerzonej, nazwanej) -- patrz laboratorium ACL.
+
+\cmdc{config-line}{access-class \textit{numer\_listy\_ACL} in}{Przypisanie listy do linii VTY}
+
+\cmdc{config}{access-list \textit{numer\_listy\_standardowej} permit \textit{adres} \textit{inwersja\_maski}}{Tworzenie przykładowej standardowej listy ACL} (do konfiguracji można wykorzystywać także inne rodzaje list)
+
+\section{STP - \textit{Spanning Tree Protocol}}
+
+\subsection{Założenia}
+\subsubsection{Zasada działania}
+\begin{itemize}
+	\item W segmencie sieci istnieje \textit{jeden} wyróżniony przełącznik, będący korzeniem drzewa rozpinającego (tzw. \textit{root bridge}),
+	\item Przełączniki nie będące root bridge układają scieżkę do korzenia wycinając wszystkie redundantne ścieżki stanowiące pętle w sieci.
+\end{itemize}
+\subsubsection{Nomenklatura}
+\begin{itemize}
+	\item root bridge -- korzeń drzewa rozpinającego,
+	\item Root ID -- identyfikator przełącznika, będącego korzeniem,
+	\item Bridge ID -- identyfikator bieżącego przełącznika,
+	\item root port -- port, który z bieżącego przełącznika prowadzi do korzenia -- w górę drzewa (nie występuje w korzeniu),
+	\item designated ports -- porty odpowiedzialne za przekazywanie ruchu w dół drzewa (TODO: zrobić rozeznanie definicji),
+	\item alternative ports -- (dla PVST i RSTP) -- porty prowadzące do korzenia, nie będące najlepszym wariantem,
+	\item BPDU -- \textit{Bridge Protocol Data Unit} -- rozgłaszane ramki STP.
+\end{itemize}
+
+\subsection{Konfiguracja}
+\subsubsection{Wymuszanie roli}
+\cmdc{config}{spanning-tree vlan \textit{numer\_VLAN} root primary}{Przeniesienie roli \textit{root bridge} na bieżące urządzenie (manipulacja dokonywana jest przez zmniejszenie priorytetu o 8192)}
+\cmdc{config}{spanning-tree vlan \textit{numer\_VLAN} root secondary}{określa \textit{priority} jako wartość ,,drugą najlepszą'' -- powodując przejęcie funkcji \textit{root bridge} gdy obecny korzeń ulegnie awarii (poprzez zmniejszenie priority o 4096)}
+
+\subsubsection{Ręczna konfiguracja parametrów}
+Kolejność wyboru \textit{root port}: 1. koszt (niższy wygrywa), 2. przysłany priorytet (niższy wygrywa), 3. numer portu (młodsza część priorytetu)
+\cmdc{config}{spanning-tree vlan \textit{numer\_VLAN} priority \textit{priorytet}}{Ręczna konfiguracja priorytetu BID (\textit{Bridge ID}) BPDU, gdzie priorytet jest wielokrotnością 4096}
+\cmdc{config-if}{spanning-tree port-priority \textit{priorytet}}{Ręczna konfiguracja priorytetu portu (granulacja 16, wartość domyślna 128)}
+\cmdc{config-if}{spanning-tree port-priority \textit{priorytet}}{Ręczna konfiguracja priorytetu portu dla VLAN -- jeden port, osobne priorytety dla każdego VLAN}
+\cmdc{config-if}{spanning-tree cost \textit{koszt}}{Ręczna konfiguracja kosztu (10Mbps = 100, 
+	100Mbps = 19, 1Gbps = 4, 10Gbps = 2)}
+
+\subsubsection{Wybór wariantu STP}
+\cmdc{config}{spanning-tree mode pvst}{Włączenie PVST (\textit{per-VLAN} STP)}
+\cmdc{config}{spanning-tree mode rapid-pvst}{Włączenie Rapid-PVST (\textit{rapid per-VLAN STP)}}
+
+\subsubsection{Wyłączenie STP}
+\cmdc{config}{spanning-tree portfast default}{Wyłączenie funkcjonowania STP dla całego przełącznika}
+\cmdc{config-if}{spanning-tree portfast}{Wyłączenie funkcjonowania STP dla pojedynczego portu}
+
+\subsection{Zabezpieczenia \texttt{bpduguard} i \texttt{guard root}}
+\cmdc{config-if}{spanning-tree bpduguard disable}{Wyłączenie blokady BPDU -- wyłączenie ignorowania BPDU spreparowanych przez stacje końcowe}
+\cmdc{config-if}{spanning-tree guard root}{Zablokowanie statusu \textit{root bridge} -- blokada portu przy próbie przejęcia roli korzenia przez inny przełącznik}
+
+\subsection{Diagnostyka}
+\cmde{show spanning-tree}{TODO: sprawdzić, co wyświetla}
+\cmde{show spanning-tree summary}{TODO: sprawdzić, czym się różni od powyższego}
+\cmde{show spanning-tree detail}{TODO: sprawdzić, czym się różni od powyższego}
+\cmde{show spanning-tree vlan \textit{numer\_VLAN} [detail])}{Wyświetlanie stanu STP dla wybranych VLAN}
+\cmde{show spanning-tree vlan \textit{pierwszy\_VLAN}-\textit{ostatni\_VLAN}}{Wyświetlanie stanu STP dla wybranych VLAN}
+\cmde{show spanning-tree vlan \textit{numer\_VLAN} interface \textit{numer\_interfejsu}) [detail]}{Wyświetlanie stanu STP dla wybranego interfejsu (TODO: sprawdzić, gdzie występuje parametr detail)}
+
+\subsubsection{Debugowanie}
+\cmde{debug spanning-tree events}{Wyświetlanie komunikatów zdarzeń STP}
+
+\section{Zarządzanie adresami MAC i filtrowanie}
+Obowiązuje notacja adresów ,,\texttt{aabb.ccdd.eeff}''.
+\cmdc{config}{mac-address-table static \textit{adres\_MAC} \textit{numer\_VLAN} interface \textit{numer\_interfejsu}}{Dodanie statycznego wpisu do tablic MAC}
+\cmdc{config}{mac-address-table static \textit{adres\_MAC} vlan \textit{numer\_VLAN} drop}{Odrzucanie ruchu zawierającego podany adres MAC (notacja aabb.ccdd.eeff)}
+
+
+\subsection{Diagnostyka}
+\cmde{show mac-address-table}{Wyświetlenie tablicy znanych adresów MAC}
+\cmde{show mac address-table}{Wyświetlenie tablicy znanych adresów MAC (Cisco 2960)}
+\cmde{show mac-address-table interface \textit{numer\_interfejsu}}{Wyświetlenie adresów MAC skojarzonych z interfejsem}
+
+\section{EtherChannel}
+Najpierw przeprowadzamy konfigurację, potem podpinamy okablowanie -- niespójna konfiguracja przeciwległych urządzeń spowoduje awaryjne wyłączenie portów (\texttt{err-disabled})!
+Wszystkie porty zagregowane przez EtherChannel muszą pracować w tym samym trybie, tj. \texttt{access} albo \texttt{trunk}.
+
+\subsection{Konfiguracja}
+\cmdc{config}{interface Port-channel \textit{numer\_interfejsu}}{Tworzenie nowego interfejsu typu Port-Channel}
+\cmdc{config-if[-range]}{channel-group \textit{numer\_EtherChannel} mode on}{Włączenie agregacji portów EtherChannel}
+
+\subsection{Diagnostyka}
+\cmde{show etherchannel summary}{Podsumowanie statusu EtherChannel}
+\cmde{debug EtherChannel}{Debugowanie EtherChannel}

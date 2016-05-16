@@ -1,0 +1,34 @@
+\chapter{Lab 72: ACL}
+Kolejne wpisy listy wprowadzamy w konwencji \textit{od szczegółu do ogółu}.
+\section{Polecenia ogólne}
+\cmdc{config-if}{ip access-group \textit{numer\_listy} \{in, out\}}{Przypisanie listy do interfejsu; \texttt{in} -- ruch przychodzący, \texttt{out} -- ruch wychodzący}
+\cmdc{config}{ip access list resequence \textit{numer\_listy} \textit{nowy\_początek\_numeracji} \textit{przyrost}}{Przebudowa numeracji reguł danej listy ACL}
+\cmdc{config}{access-list \textit{numer\_listy} remark \textit{komentarz}}{Dodaje komentarz do listy}
+
+\section{Listy standardowe (1-99)}
+Działają na adresach IP ze sprecyzowanymi maskami, nie rozróżniają źródła i celu.
+\cmdc{config}{access-list \textit{numer\_listy} \{permit, deny\} \{any, host adres\_IP, adres\_IP maska\_odwrócona\}}{Dodanie wpisu do listy standardowej}
+\cmdc{config}{ip access list standard \textit{numer\_listy}}{Wejście w tryb modyfikacji listy \texttt{config-std-nacl}}
+\cmdc{config-std-nacl}{\textit{numer\_sekwencji} \{wpis\_ACL\}}{Modyfikacja pojedynczego wpisu o zadanym numerze sekwencji}
+\cmdc{config-std-nacl}{no \textit{numer\_sekwencji}}{Kasowanie wpisu o zadanym numerze sekwencji}
+
+\section{Listy rozszerzone (100-199)}
+TODO: to jest do przepisania
+
+
+Ilość kombinacji jest rozbudowana; zamiast gramatyki podane są przykładowe użycia:
+\cmdc{config}{access list 190 deny tcp any 10.10.10.0 0.0 0.0.0.255 eq 23}{Zablokowanie transmisji TCP przychodzących z dowolnego źródła do sieci 10.10.10.10/24 z portem docelowym \{23, telnet\} (\texttt{telnet})}
+\cmdc{config}{access list 190 deny tcp any eq \{23, telnet\} any eq 40}{Zablokowanie transmisji TCP *:23 $\leftrightarrow$ *:40}
+\cmdc{config}{access list 190 deny tcp 10.1.1.1 0.0.0.1 eq 23 200.200.200.1 0.0.0.1 eq 100 }{Zablokowanie transmisji TCP: 10.1.1.0/31:23 $\leftrightarrow$ 200.200.200.0/31:100}
+TODO: Sprawdzić powyższe
+\cmdc{config}{access list 190 deny tcp host 10.10.10.1 any}{Zablokowanie transmisji TCP: 10.10.10.1:* $\leftrightarrow$ *:*}
+\cmdc{config}{access list 190 deny \{ip, icmp\} any 10.10.10.0 0.0.0.255 }{Zablokowanie ruchu \{IP, ICMP\} * $\leftrightarrow$ 10.10.10.0/24}
+
+\section{Listy nazwane}
+Działają identycznie jak listy standardowe/rozszerzone, jednak odwołujemy się do nich przez nazwę, nie liczbę.
+\cmdc{config}{ip access-list \{standard, extended\} \textit{nazwa\_listy}}{Tworzenie nowej listy nazwanej}
+
+\section{Diagnostyka}
+\cmde{show access-lists}{Wyświetlanie zapisanych list ACL}
+\cmde{show access-list \textit{numer\_listy} [interface \textit{numer\_interfejsu} \{in, out\}]}{Wyświetlanie szczegółów ACL (ilość dopasowań listy ACL)}
+\cmde{clear access-list counters}{Kasowanie liczników dopasowań}

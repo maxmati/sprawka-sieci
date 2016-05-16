@@ -1,0 +1,35 @@
+\chapter{Lab 37: Routery Cisco -- Serial, PPP (PAP, CHAP, Multilink)}
+\section{Konfiguracja parametrów łącza}
+\cmdc{config-if}{encapsulation \{PPP,HDLC\}}{Wybór enkapsulacji: PPP -- \textit{Point-to-Point Protocol}, HDLC -- \textit{High level Data Link Control}}
+\cmdc{config-if}{clock rate \texttt{częstotliwość\_zegara}}{Wybór częstotliwości taktowania zegara łącza \underline{po stronie DCE}}
+\subsection{Diagnostyka}
+\cmde{show ip interface serial \texttt{numer\_interfejsu}}{Sprawdzenie stanu połączenia szeregowego}
+\cmde{show controllers serial \texttt{numer\_interfejsu}}{TODO: sprawdzić, czym się różni od powyższego}
+\cmde{debug ppp authentication \texttt{numer\_interfejsu}}{TODO: sprawdzić, czym się różni od powyższego}
+
+\section{PPP}
+\subsection{PAP -- autentykacja \texttt{plaintext}}
+Nazwa użytkownika i hasło są dowolne. Bazą kont do autentykacji PAP jest lokalna baza routera. Poniższa konfiguracja demonstruje autentykację \textit{w jedną stronę} -- sprawdzana jest wiarygodność zdalnego routera przez lokalny.
+\subsubsection{Konfiguracja lokalna -- serwera}
+\cmdc{config}{username \textit{nazwa\_użytkownika} password \textit{hasło}}{Tworzenie konta dla użytkownika zdalnego}
+\cmdc{config-if}{ppp authentication pap}{Włączenie autentykacji PPP PAP}
+
+\subsubsection{Konfiguracja zdalna -- klienta}
+\cmdc{config-if}{ppp pap sent-username \textit{nazwa\_użytkownika} password \textit{hasło}}{Konfiguracja danych logowania wysyłanych do serwera}
+
+\subsection{CHAP -- autentykacja \texttt{challenge-response handshake}}
+Zdalny router posiada lokalne konto o nazwie użytkownika takiej, jak nazwa hosta i wspólnym haśle (sprawdzana jest zgodność skrótu MD5). Polecenia są identyczne dla obu końców z wyjątkiem nazwy użytkownika -- wpisujemy \texttt{hostname} przeciwległego routera.
+\cmdc{config}{username \textit{hostname\_odległego\_końca} password \textit{hasło}}{Tworzenie konta dla przeciwległego końca}
+\cmdc{config-if}{ppp authentication chap}{Włączenie autentykacji PPP CHAP}
+
+\subsection{Diagnostyka autentykacji}
+\cmde{debug ppp authentication \texttt{numer\_interfejsu}}{Włączenie debugowania autentykacji PPP}
+
+\subsection{\texttt{multilink} PPP -- agregacja portów}
+Adresację IP prowadzimy na interfejsie \texttt{multilink}, a nie jego składowych.
+\cmdc{config}{interface multilink \textit{numer\_interfejsu}}{Tworzenie nowego interfejsu typu \texttt{multilink}}
+\cmdc{config-if}{encapsulation ppp}{Włączenie enkapsulacji PPP}
+\cmdc{config-if}{ppp multilink group \textit{numer\_interfejsu\_multilink}}{Dołączenie interfejsu fizycznego do interfejsu \texttt{multilink}}
+\cmdc{config-if}{ppp multilink fragment size \textit{wielkość\_fragmentu}}{Ustawienie wielkości fragmentu \underline{dla całego} interfejsu \texttt{multilink}}
+
+\section{TODO: Łącza async AUX, HSSI, modem}
