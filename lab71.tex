@@ -1,0 +1,91 @@
+\chapter{Lab 71: IGP -- \textit{Interior Gateway Protocol}s, tunele GRE (TODO: tunele osobno)}
+\section{Polecenia ogólne}
+\cmdc{config}{ip routing}{Włączenie routingu IP}
+\cmdc{config}{ip classless}{Włączenie routingu bezklasowego}
+\cmdc{config}{ip route \textit{adres\_sieci} \textit{odwrócona\_maska} [\textit{dystans\_administracyjny}]}{Dodanie statycznego wpisu do tablicy routingu (niesprecyzowany dystans = 1)}
+\cmdc{config-router}{no auto-summary}{Wyłączenie automatycznego uogólniania tras (supernettingu)}
+
+\section{RIP -- \textit{Routing Information Protocol}}
+Trasy dodawane przez RIP mają maksymalną metrykę równą 120.
+\cmdc{config}{router rip}{Wejście w tryb konfiguracji RIP}
+
+\subsection{RIPv1}
+\cmdc{config-router}{version 1}{Włączenie wersji 1 protokołu (domyślne)}
+\cmdc{config-router}{network \textit{adres\_sieci}}{Włączenie sieci do procesu routingu (routing klasowy)}
+
+\subsection{RIPv2}
+\cmdc{config-router}{version 2}{Włączenie wersji 2 protokołu}
+\cmdc{config-router}{network \textit{adres\_sieci} \textit{odwrócona\_maska}}{Włączenie sieci do procesu routingu (routing bezklasowy)}
+\cmdc{config-router}{no auto-summary}{Wyłączenie automatycznego uogólniania tras (supernettingu)}
+
+\subsubsection{Selektywny wybór wersji protokołu}
+\cmdc{config-if}{ip rip send version \{1, 2\}}{Wybór konkretnej wersji protokołu rozgłaszanej przez interfejs; dostępne wyłącznie dla RIPv2}
+\cmdc{config-if}{ip rip receive version \{1, 2\}}{Wybór konkretnej wersji protokołu rozgłaszanej przez interfejs; dostępne wyłącznie dla RIPv2}
+
+\subsubsection{Autentykacja}
+\cmdc{config}{key chain \textit{nazwa\_keychain}}{Tworzenie nowego \texttt{keychain} (\textit{pęku kluczy})}
+\cmdc{config-keychain}{key \textit{numer\_klucza}}{Dodawanie nowego klucza do \texttt{keychain}}
+\cmdc{config-keychain-key}{key-string \textit{klucz}}{Ustawienie wartości klucza}
+\cmdc{config-router}{ip authentication key-chain \textit{nazwa\_łańcucha\_kluczy}}{Wybór \texttt{keychain} używanego podczas autentykacji}
+\cmdc{config-router}{ip authentication mode \{md5, sha1\}}{Wybór funkcji skrótu używanej podczas autentykacji}
+
+\subsection{Diagnostyka}
+\cmde{debug ip rip}{Włączenie debugowania RIP}
+
+\section{OSPF -- \textit{Open Shortest Path First}}
+Domyślne interwały \texttt{hello-time}: 10 sekund dla sieci typu broadcast oraz point-to-point, 30 - non-broadcast oraz point-to-multipoint.
+\texttt{dead-time} jest 4 razy dłuższy niż \texttt{hello-time}.
+\cmdc{config}{router ospf \textit{numer\_procesu}}{Wejście w tryb konfiguracji OSPF}
+\cmdc{config-router}{network \textit{adres\_sieci} \textit{odwrócona\_maska} area \textit{numer\_obszaru}}{Włączenie sieci do procesu routingu}
+\cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada}}{Rejestrowanie sąsiada OSPF (konieczne w przypadku sieci \textit{Non-Broadcast Multiple Access})}
+\cmdc{config-router}{log-adjacency-changes}{Wyświetlaj komunikaty o zmianie sąsiadów TODO: sprawdzić}
+
+\subsection{Ustawienia pojedynczego interfejsu}
+\cmdc{config-if}{ip ospf priority \textit{priorytet}}{Ustawienie priorytetu przy wyborze roli (DR, BDR) dla sieci typu broadcast (domyślnie 1) -- wyższa wartość wygrywa}
+\cmdc{config-if}{ip ospf hello-interval \textit{interwał}}{Ustawienie interwału czasowego (w sekundach) dla pakietów \texttt{hello}; powoduje \textit{implicite} zmianę \texttt{dead-time}}
+\cmdc{config-if}{ip ospf cost \textit{koszt}}{Zmiana kosztu naliczanego dla łącza \textit{wchodzącego do routera}}
+
+\subsection{\textit{Virtual Link}}
+Konfigurujemy, gdy router nie ma bezpośredniego dostępu do szkieletu -- tranzyt jest prowadzony przez inny obszar. Polecenia wpisujemy \textit{wyłącznie} na routerze będącym w szkielecie oraz obszarze docelowym. W poleceniu wpisujemy \texttt{area} znajdujące pomiędzy obszarami; identyfikatorem OSPF (to nie jest adres IP!) jest Router-ID \textit{przeciwległego} końca.
+\cmdc{config-router}{area \textit{numer\_obszaru\_pośredniego} virtual-link \textit{przciwległy\_Router-ID}}{Konfiguracja \textit{Virtual Link}}
+
+\subsubsection{Diagnostyka}
+\cmde{show ip ospf virtual-links}{Wyświetlenie informacji o skonfigurowanych \textit{Virtual Link}s}
+
+\subsection{Diagnostyka}
+\cmde{show ip ospf interface \textit{numer\_interfejsu}}{Wyświetlenie informacji OSPF dotyczących wybranego interfejsu}
+\cmde{show ip ospf neighbor}{Wyświetlenie bazy sąsiadów OSPF}
+\cmde{show ip ospf border-routers}{Wyświetlenie routerów ABR TODO: sprawdzić}
+
+\subsubsection{Debugowanie}
+\cmde{debug ip ospf adjacency}{Debugowanie zmian adjacencji (sąsiadów) TODO: sprawdzić}
+\cmde{debug ip ospf events}{Debugowanie wydarzeń}
+
+\section{Redystrybucja tras}
+W trybie \texttt{(config-router)} polecenie \texttt{redistribute} oznacza redystrybucję za pomocą protokołu \textit{aktualnie konfigurowanego} informacji pochodzących z protokołu \textit{jawnie} zadanego.
+
+\subsection{Redystrybucja za pomocą RIP}
+\textbf{Podanie metryki jest konieczne}, ponieważ RIP wspiera \textit{maksymalnie} 15 przeskoków (jest to maksymalna wartość metryki). RIP nie flaguje tras pochodzących z obcego protokołu.
+\cmdc{config-router}{redistribute ospf \textit{numer\_procesu\_OSPF} metric \textit{metryka}}{Redystrybucja tras pochodzących z OSPF przez RIP}
+
+\subsection{Redystrybucja za pomocą OSPF}
+Dodanie do konfiguracji parametru \texttt{subnets} powoduje, że redystrybuowane są sieci nieklasowe (VLSM).
+\cmdc{config-router}{redistribute rip metric \textit{metryka} subnets}{Redystrybucja tras pochodzących z RIP przez OSPF}
+
+\section{Tunele GRE -- \textit{Generic Routing Encapsulation}}
+Konfigurację przeprowadzamy na obu końcach, zamieniając adresy celu i źródła.
+Tunel jest warstwy trzeciej, tworzy zatem pełnoprawną sieć IP -- konieczne jest ustalenie wewnętrznej adresacji i skonfigurowanie interfejsów (np. za pomocą \texttt{ip address ...}).
+\cmdc{config}{interface tunnel \textit{numer\_interfejsu}}{Tworzenie nowego interfejsu tunelu}
+\cmdc{config-if}{tunnel source \textit{interfejs\_źródłowy}}{Określenie interfejsu, którym będą wychodziły enkapsulowane (tunelowane) pakiety GRE}
+\cmdc{config-if}{tunnel destination \textit{adres\_IP\_końca}}{Określenie adresu IP odległego końca tunelu GRE}
+
+\subsection{Zmiana MTU i TCP MSS clamping}
+Tunelowanie powoduje nadanie dodatkowego narzutu (nagłówków GRE), efektywnie zmniejszając MTU oraz MSS.
+\cmdc{config-if}{ip mtu \textit{wartość\_MTU}}{Zmiana MTU łącza}
+\cmdc{config-if}{ip tcp adjust-mss \textit{wartość\_MSS}}{Zmiana MSS łącza (MSS clamping)}
+
+\section{Diagnostyka}
+\cmde{show ip route}{Wyświetlenie tablicy routingu}
+\cmde{show ip protocols}{TODO: sprawdzić}
+\cmde{debug ip routing}{Włączenie debugowania routingu}
+\cmde{clear ip route *}{Czyszczenie danych routingu protokołów dynamicznych TODO: sprawdzić, czy kasuje statyczne wpisy}

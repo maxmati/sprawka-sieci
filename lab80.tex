@@ -1,0 +1,75 @@
+\chapter{Lab 80: \texttt{route-map}s, Policy Based Routing, redundancja (HSRP, VRRP), IP SLA}
+\section{Routing statyczny}
+\cmdc{config}{ip route 0.0.0.0 0.0.0.0 \textit{adres\_IP\_następnego\_skoku}}{Dodawanie bramy domyślnej (ang. \textit{gateway of last resort})}
+\cmdc{config}{ip route \textit{adres\_sieci} \textit{maska\_sieci} \textit{interfejs\_point-to-point} [\textit{dystans\_administracyjny}]}{Dodawanie trasy routingu przechodzącej przez interfejs point-to-point}
+\cmde{clear ip route *}{Kasowanie całej tablicy reguł routowania TODO: sprawdzić, co ze statycznymi wpisami}
+\cmdc{config-routers}{redistribute static}{Redystrybucja statycznych tras routingu za pomocą dynamicznego protokołu rutowania}
+
+\section{\texttt{route-map}s i Policy Based Routing}
+Route mapy wewnątrz korzystają z list ACL do klasyfikacji (\texttt{match}owania) ruchu, na którym mają operować. Numer sekwencji ma znaczenie podobne jak przy listach ACL -- rozpatrywane są po kolei (od najmniejszego, do największego numeru sekwencji); spełnienie reguły kończy dalszą klasyfikację. TODO: sprawdzić to
+
+\subsection{Konfiguracja \texttt{route-map}y}
+\cmdc{config}{route-map \textit{nazwa\_mapy} \textit{numer\_sekwencji}}{Tworzenie nowej \texttt{route-map}y}
+\cmdc{config-route-map}{match ip address \textit{numer\_listy\_ACL}}{Ustalenie warunków dopasowania reguły}
+\cmdc{config-route-map}{set interface \textit{nazwa\_interfejsu}}{Ustalenie interfejsu wyjściowego pakietu}
+\cmdc{config-route-map}{set ip next-hop \textit{adres\_IP\_następnego\_routera}}{Ustalenie routera, do którego zostanie przekazany pakiet}
+
+\subsection{Przypisanie \texttt{route-map}y do interfejsu}
+\cmdc{config-if}{no ip route-cache}{Wyłączenie cache routingu}
+\cmdc{config-if}{ip policy route-map \textit{nazwa\_mapy}}{Przypisanie \texttt{route-map}y do interfejsu}
+
+\subsection{Diagnostyka}
+\cmde{show ip policy}{Sprawdzenie stanu \textit{Policy Based Routing}u}
+\cmde{debug ip policy}{Włączenie debugowania \textit{Policy Based Routing}u}
+\cmde{show route-maps}{Wyświetlenie \texttt{route-map}}
+\cmde{show access-lists}{Wyświetlenie list ACL}
+
+\section{Rendundancja routerów}
+Routery pracują w dwóch trybach: \textit{active} bądź \textit{standby}.
+Oba protokoły wspierają autentykację. TODO: dodać link do appendix
+
+\subsection{Cisco HSRP -- \textit{Hot Standby Routing Protocol}}
+\cmdc{config-if}{standby \textit{numer\_grupy\_standby} ip \textit{adres\_IP\_standby}}{Ustalenie adresu IP standby (współdzelonego)}
+\cmdc{config-if}{standby \textit{numer\_grupy\_standby} priority \textit{priorytet\_routera}}{Ustalenie priorytetu routera (większa wartość ma pierwszeństwo)}
+\cmdc{config-if}{standby \textit{numer\_grupy\_standby} preempt}{Włączenie \textit{wywłaszczania} (po powrocie routera o wyższym priorytecie powraca on do trybu \textit{active})}
+
+\subsubsection{Diagnostyka}
+\cmde{show standby}{Wyświetlenie informacji o stanie HSRP}
+\cmde{show mac-address-table int \textit{nazwa\_interfejsu}}{Na przełączniku podłączonym do obu routerów: sprawdzenie rozgłoszonych adresów MAC routerów}
+
+\subsection{VRRP -- \textit{Virtual Routing Redundancy Protocol}}
+\cmdc{config-if}{vrrp \textit{numer\_grupy\_VRRP} ip \textit{adres\_IP\_standby}}{Ustalenie adresu IP standby (współdzelonego)}
+\cmdc{config-if}{vrrp \textit{numer\_grupy\_VRRP} priority \textit{priorytet\_routera}}{Ustalenie priorytetu routera (większa wartość ma pierwszeństwo)}
+\cmdc{config-if}{vrrp \textit{numer\_grupy\_vrrp} preempt}{Włączenie \textit{wywłaszczania} (po powrocie routera o wyższym priorytecie powraca on do trybu \textit{active})}
+
+\subsubsection{Zmiana priorytetu w skutek wydarzeń}
+\cmdc{config}{track \textit{numer\_procesu\_śledzenia} interface \textit{nazwa\_interfejsu} line-protocol}{Zdefiniowanie procesu śledzenia zmiany stanu protokołu łącza}
+\cmdc{config-if}{vrrp \textit{numer\_grupy\_VRRP} track \textit{numer\_procesu\_śledzenia} decrement \textit{różnica\_priorytetu}}{Zdefiniowanie zmniejszenie priorytetu w skutek zajścia zdarzenia}
+
+\subsubsection{Diagnostyka}
+\cmde{show vrrp}{Wyświetlenie informacji o stanie VRRP}
+
+\subsection{Diagnostyka}
+\cmde{show mac-address-table int \textit{nazwa\_interfejsu}}{Na przełączniku podłączonym do obu routerów: sprawdzenie rozgłoszonych adresów MAC routerów}
+
+\section{IP SLA -- \textit{Service Level Agreement}}
+\subsection{Cisco IOS 12.3}
+\cmdc{config}{ip sla monitor \textit{numer\_opcji\_monitorowania}}{Definiowanie operacji monitorowania}
+\cmdc{config-sla-monitor}{type echo protocol ip icmpEcho \textit{adres\_IP} source-interface \\ \textit{nazwa\_interfejsu\_źródłowego}}{Definiowanie monitorowania hosta poprzez wysyłanie pakietów \textit{ICMP Echo Request} (\texttt{ping})}
+\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Zdefiniowanie czasu, po jakim host zostanie uznany jako niedostępny braku odpowiedzi}
+\cmdc{config-ip-sla}{treshold 2}{TODO: sprawdzić}
+\cmdc{config-ip-sla}{frequency 3}{TODO: sprawdzić}
+\cmdc{config}{ip sla monitor schedule \textit{numer\_opcji\_monitorowania} life forever start-time now}{Uruchomienie monitorowania}
+
+\subsection{Od Cisco IOS 12.4}
+\cmdc{config}{ip sla \textit{numer\_opcji\_monitorowania}}{Definiowanie operacji monitorowania}
+\cmdc{config-sla-monitor}{icmp-echo \textit{adres\_IP} source-interface \textit{nazwa\_interfejsu\_źródłowego}}{Definiowanie monitorowania hosta poprzez wysyłanie pakietów \textit{ICMP Echo Request} (\texttt{ping})}
+\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Zdefiniowanie czasu, po jakim host zostanie uznany jako niedostępny braku odpowiedzi}
+\cmdc{config-ip-sla}{treshold 2}{TODO: sprawdzić}
+\cmdc{config-ip-sla}{frequency 3}{TODO: sprawdzić}
+\cmdc{config}{ip sla schedule \textit{numer\_opcji\_monitorowania} life forever start-time now }{Uruchomienie monitorowania}
+
+\subsection{Use case: konfiguracja bramy w zależności od dostępności hosta}
+Konfigurowany jest tzw. RTR -- \textit{Response Time Reporter}. Oprócz trasy zdefiniowanej poniżej powinna istnieć inna, o \textbf{wyższej} metryce -- gdy host jest dostępny, brana jest trasa z parametrem \texttt{track} (o niższej metryce -- preferowana); w przeciwnym wypadku: ta z wyższą metryką.
+\cmdc{config}{track \textit{numer\_obiektu\_śledzenia} rtr \textit{numer\_opcji\_monitorowania} reachability}{Konfiguracja reakcji na zdarzenie}
+\cmdc{config TODO: sprawdzić}{ip route 0.0.0.0 0.0.0.0 \textit{adres\_IP\_bramy} track \textit{metryka\_gdy\_dostępny}}{Dodanie domyślnej trasy routingu gdy host jest dostępny}

@@ -1,0 +1,26 @@
+\chapter{IP multicast}
+\section{IGMP Snooping w przełącznikach Ethernet}
+\cmdc{config}{ip igmp snooping}{Włączenie funkcji IGMP Snooping}
+
+\section{PIM -- \textit{Protocol Independent Multicast}}
+\cmdc{config}{ip multicast-routing}{Włączenie routingu multicast}
+\cmdc{config-if}{ip igmp join-group \textit{adres\_multicast}}{Zdefiniowanie fikcyjnego źródła IP multicast}
+
+\section{\texttt{dense-mode} (push mode)}
+\cmdc{config-if}{ip pim dense-mode}{Włączenie trybu dense}
+
+\subsection{Diagnostyka}
+\cmde{show ip mroute}{Wyświetlanie tablicy routingu multicast}
+\cmde{show ip igmp groups}{Wyświetlanie zarejestrowanych grup IGMP}
+\cmde{show ip igmp grou membership}{Wyświetlenie tablicy grup IGMP}
+\cmde{clear ip mroute *}{Usunięcie wpisów z tablicy routingu muticast}
+\cmde{clear ip igmp groups}{Usunięcie wpisów z tablicy grup IGMP}
+
+\section{\texttt{sparse-mode} (pull mode)}
+Jeden z routerów pełni rolę \textit{Rendezvous Point} -- przechowuje informacje nt. lokalizacji źródeł multicast.
+\cmdc{config}{ip pim rp-address \textit{adres\_IP\_RP}}{Wskazanie, pod jakim adresem znajduje się \textit{Rendezvous Point}}
+
+\subsection{Diagnostyka}
+\cmde{show ip pim rp}{TODO: sprawdzić}
+\cmde{show ip pim rp mapping}{TODO: sprawdzić}
+\cmde{show ip pim neighbor}{TODO: sprawdzić}
