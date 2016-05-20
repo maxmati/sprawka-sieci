@@ -1,0 +1,24 @@
+\chapter{NAT -- \textit{Network Address Translation}}
+
+\section{NAT \texttt{overload}}
+Ruch kontrolowany jest poprzez listy ACL; lista musi zezwalać na ruch wychodzący z sieci wewnętrznej.
+
+\cmdc{config}{access-list \textit{numer\_listy} permit \textit{adres\_sieci} \textit{odwrócona\_maska}}{Dodanie przykładowej listy ACL, której celem jest określenie hostów znajdujących się po stronie \textit{inside}}
+\cmdc{config}{ip nat inside source list \textit{numer\_listy\_ACL} interface \textit{nazwa\_interfejsu\_zewnętrznego} overload}{Uruchomienie agregacji adresów z sieci inside pod adresem IP zadanego interfejsu}
+\cmdc{config-if}{ip nat inside}{Określenie interfejsu do sieci wewnętrznej (inside)}
+\cmdc{config-if}{ip nat outside}{Określenie interfejsu do sieci zewnętrznej (outside)}
+
+\section{Translacje statyczne, DMZ}
+Translacja statyczna jest dwukierunkowa. Host zdefiniowany adresem \textit{po} podmianie adresu źródłowego nazywany jest \textit{hostem wirtualnym} implementowanym przez NAT.
+\cmdc{config}{ip nat inside source static \textit{adres\_źródłowy\_przed\_NAT} \textit{adres\_źródłowy\_po\_NAT}}{Podmiana adresu źródłowego}
+
+\section{NAPT -- translacje statyczne z przekierowaniem portów TCP/UDP}
+\cmdc{config}{ip nat inside source static \{tcp, udp\} \textit{adres\_IP\_hosta\_inside} \textit{port\_hosta\_inside} \\ \textit{adres\_zewnętrzny} \textit{port\_zewnętrzny}}{Zdefiniowanie reguły statycznej NAT i portów TCP}
+
+\subsection{Diagnostyka}
+\cmde{debug ip tcp transactions}{TODO: spawdzić, co to znaczy}
+
+\section{Diagnostyka}
+\cmde{show ip nat translations}{Wyświetlenie aktualnych translacji NAT}
+\cmde{show ip nat statistics}{Wyświetlenie statystyk NAT}
+\cmde{show ip access-lists}{Wyświetlenie list ACL}
