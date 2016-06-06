@@ -1,0 +1,32 @@
+\chapter{Lab 56: HP ProCurve}
+
+\section{Konfiguracja}
+
+\subsection{Ogólne}
+\cmdc{config}{telnet-server}{Włączenie serwera telnet}
+\cmdc{config}{no telnet}{Wyłączenie serwera telnet}
+
+\cmdc{config}{web-management}{Włączenie serwera WWW}
+
+\cmdc{config}{ip ssh key-size \textit{rozmiar\_klucza} }{Ustawienie rozmiaru klucza SSH}
+\cmdc{config}{crypto key generate}{Generowanie klucza SSH (async)}
+\cmdc{config}{ip ssh port \textit{numer\_portu} }{Ustawienie portu na którym ma działać serwer SSH}
+\cmdc{config}{ip ssh}{Włączenie serwera SSH}
+
+\cmdc{config}{interface \textit{numer}}{Przejście do konfiguracji portu}
+\cmdc{config}{ip route \textit{netowork} \textit{mask} reject}{Zdefiniowanie reguły null}
+
+\subsection{VLAN}
+W przypadku przełączników HP w przeciwieństwie do tych Cisco przypisujemy porty do vlan'ów a nie vlan'y do portów
+
+\cmdc{vlan-\textit{numer}}{tagged \textit{numer\_lub\_zakres\_portów}}{Przypisanie portu do Vlana}
+
+\section{Diagnostyka}
+
+\subsection{Ogólne}
+\cmde{show telnet}{Wyświetlenie informacji o stanie serwera telnet}
+\cmde{show ip ssh}{Wyświetlenie informacji o stanie serwera SSH}
+
+\subsection{VLAN}
+\cmde{show vlan}{Wyświetlenie informacji o stanie bazy vlan}
+\cmde{show vlan \textit{numer}}{Wyświetlenie informacji konkretnym vlan'ie}
