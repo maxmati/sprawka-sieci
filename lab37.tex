@@ -4,8 +4,7 @@
 \cmdc{config-if}{clock rate \texttt{częstotliwość\_zegara}}{Wybór częstotliwości taktowania zegara łącza \underline{po stronie DCE}}
 \subsection{Diagnostyka}
 \cmde{show ip interface serial \texttt{numer\_interfejsu}}{Sprawdzenie stanu połączenia szeregowego}
-\cmde{show controllers serial \texttt{numer\_interfejsu}}{TODO: sprawdzić, czym się różni od powyższego}
-\cmde{debug ppp authentication \texttt{numer\_interfejsu}}{TODO: sprawdzić, czym się różni od powyższego}
+\cmde{show controllers serial \texttt{numer\_interfejsu}}{Informacje o połączeniu elektrycznym (DCE/DTE), zegar, liczniki błędów}
 
 \section{PPP}
 \subsection{PAP -- autentykacja \texttt{plaintext}}
@@ -31,5 +30,3 @@ Adresację IP prowadzimy na interfejsie \texttt{multilink}, a nie jego składowy
 \cmdc{config-if}{encapsulation ppp}{Włączenie enkapsulacji PPP}
 \cmdc{config-if}{ppp multilink group \textit{numer\_interfejsu\_multilink}}{Dołączenie interfejsu fizycznego do interfejsu \texttt{multilink}}
 \cmdc{config-if}{ppp multilink fragment size \textit{wielkość\_fragmentu}}{Ustawienie wielkości fragmentu \underline{dla całego} interfejsu \texttt{multilink}}
-
-\section{TODO: Łącza async AUX, HSSI, modem}

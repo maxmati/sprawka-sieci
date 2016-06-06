@@ -13,14 +13,10 @@ Działają na adresach IP ze sprecyzowanymi maskami, nie rozróżniają źródł
 \cmdc{config-std-nacl}{no \textit{numer\_sekwencji}}{Kasowanie wpisu o zadanym numerze sekwencji}
 
 \section{Listy rozszerzone (100-199)}
-TODO: to jest do przepisania
-
-
 Ilość kombinacji jest rozbudowana; zamiast gramatyki podane są przykładowe użycia:
 \cmdc{config}{access list 190 deny tcp any 10.10.10.0 0.0 0.0.0.255 eq 23}{Zablokowanie transmisji TCP przychodzących z dowolnego źródła do sieci 10.10.10.10/24 z portem docelowym \{23, telnet\} (\texttt{telnet})}
 \cmdc{config}{access list 190 deny tcp any eq \{23, telnet\} any eq 40}{Zablokowanie transmisji TCP *:23 $\leftrightarrow$ *:40}
 \cmdc{config}{access list 190 deny tcp 10.1.1.1 0.0.0.1 eq 23 200.200.200.1 0.0.0.1 eq 100 }{Zablokowanie transmisji TCP: 10.1.1.0/31:23 $\leftrightarrow$ 200.200.200.0/31:100}
-TODO: Sprawdzić powyższe
 \cmdc{config}{access list 190 deny tcp host 10.10.10.1 any}{Zablokowanie transmisji TCP: 10.10.10.1:* $\leftrightarrow$ *:*}
 \cmdc{config}{access list 190 deny \{ip, icmp\} any 10.10.10.0 0.0.0.255 }{Zablokowanie ruchu \{IP, ICMP\} * $\leftrightarrow$ 10.10.10.0/24}
 

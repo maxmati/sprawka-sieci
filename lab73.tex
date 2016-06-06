@@ -1,4 +1,4 @@
-\chapter{NAT -- \textit{Network Address Translation}}
+\chapter{Lab 73: NAT -- \textit{Network Address Translation}}
 
 \section{NAT \texttt{overload}}
 Ruch kontrolowany jest poprzez listy ACL; lista musi zezwalać na ruch wychodzący z sieci wewnętrznej.
@@ -16,7 +16,7 @@ Translacja statyczna jest dwukierunkowa. Host zdefiniowany adresem \textit{po} p
 \cmdc{config}{ip nat inside source static \{tcp, udp\} \textit{adres\_IP\_hosta\_inside} \textit{port\_hosta\_inside} \\ \textit{adres\_zewnętrzny} \textit{port\_zewnętrzny}}{Zdefiniowanie reguły statycznej NAT i portów TCP}
 
 \subsection{Diagnostyka}
-\cmde{debug ip tcp transactions}{TODO: spawdzić, co to znaczy}
+\cmde{debug ip tcp transactions}{Debugowanie znaczących pakietów TCP: zmiany stanu, retransmisje, duplikaty}
 
 \section{Diagnostyka}
 \cmde{show ip nat translations}{Wyświetlenie aktualnych translacji NAT}

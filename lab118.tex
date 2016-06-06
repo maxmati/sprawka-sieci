@@ -1,0 +1,28 @@
+\chapter{Lab 118: SNMP -- \textit{Simple Network Management Protocol}}
+SNMP pracuje na porcie 162 UDP.
+
+\cmdc{config}{snmp-server community \textit{nazwa\_community} \{ro, rw, view\}}{Dodawanie nowego \texttt{community}}
+
+\subsection{SNMP Traps -- pułapki SNMP}
+\cmdc{config}{snmp-server host \textit{adres\_IP\_hosta} \{1, 2c, 3\} \textit{nazwa\_community} [\textit{rodzaj\_komunikatu}]}{Dodawanie hosta, do którego wysyłane będą pułapki (konkretnego typu -- np. config)}
+\cmdc{config}{snmp-server enable traps \textit{rodzaj\_zdarzenia}]}{Włączenie wyłapywania konkretnych zdarzeń}
+
+\subsection{SNMP wersja 3}
+\cmdc{config}{snmp-server view \textit{nazwa\_widoku} \textit{gałąź\_MIB} included}{Tworzenie nowego widoku}
+\cmdc{config}{snmp-server group \textit{nazwa\_grupy} v\textit{wersja} priv read \textit{widok\_odczytu} write \textit{widok\_zapisu} notify \textit{widok\_notyfikacji}}{Utworzenie grupy z określonymi widokami odczytu, zapisu i notyfikacji}
+\cmdc{config}{snmp-server user \textit{nazwa\_użytkownika} \textit{nazwa\_grupy} v\textit{wersja} auth \{md5, sha\} \textit{hasło} priv des56 \textit{klucz}}{Tworzenie nowego użytkownika SNMP}
+
+\subsubsection{Zarządzanie uprawnieniami}
+\cmdc{config}{snmp-server group \textit{nazwa\_grupy} v3 auth \{read, write\} \textit{nazwa\_widoku} access \textit{numer\_listy\_ACL}}{Zarządzanie uprawnieniami poprzez listę ACL}
+
+\subsection{Zdalne logowanie komunikatów systemowych}
+\cmdc{config}{logging trap debugging}{Włączenie systemu logowania dla komunikatów \texttt{debug}}
+\cmdc{config}{logging facility \{syslog, \textit{adres\_IP\_hosta}\}}{Wybór sposobu loggowania}
+\cmdc{config}{logging file flash:\textit{nazwa\_pliku} debugging}{Logowanie do pliku}
+
+\subsection{Diagnostyka}
+\cmde{show snmp mib}{Wyświetlenie bazy MIB SNMP}
+\cmde{show snmp host}{Wyświetlenie skonfigurowanych hostów SNMP}
+\cmde{show snmp user}{Wyświetlenie użytkowników SNMP}
+\cmde{show snmp view}{Wyświetlenie widoków SNMP}
+\cmde{debug snmp packets}{Debugowanie pakietów SNMP}

@@ -7,7 +7,7 @@
 \cmdc{config}{interface range \textit{nazwa\_interfejsu}/\textit{gniazdo\_pierwsze} - \textit{gniazdo\_ostatnie}}{Wejście w tryb konfiguracji wielu portów jednocześnie (zakresu)}
 
 \subsection{VLAN}
-Domyślnie port znajduje się w trybie \texttt{dynamic} czyli adaptuje się do portu po drugiej stronie.
+Domyślnie port znajduje się w trybie \texttt{dynamic} czyli adaptuje się do portu po drugiej stronie. Baza danych VLAN trzymana jest w pliku \texttt{vlan.dat} (nie w \texttt{startup-config}!).
 
 \subsubsection{Konfiguracja}
 \cmdc{config-if}{switchport mode \{access,trunk,dynamic\}}{zmiana trybu pracy przełącznika (dynamic - uzgadniany z drugą stroną)}
@@ -19,10 +19,10 @@ Domyślnie port znajduje się w trybie \texttt{dynamic} czyli adaptuje się do p
 \cmdc{config-if}{switchport trunk allowed vlan remove 10}{Usunięcie wybranego VLAN z trunku}
 
 \subsubsection{Diagnostyka}
-\cmde{show interface trunk}{??}
-\cmde{show interface \textit{nazwa\_interfejsu} switchport}{??}
-\cmde{show interface \textit{nazwa\_interfejsu} status}{??}
-\cmde{vlan database}{??}
+\cmde{show interfaces trunk}{Wyświetla enkapsulację dla interfejsów trunk oraz numery VLAN dopuszczonych do ruchu}
+\cmde{show interfaces \textit{nazwa\_interfejsu} switchport}{Wyświetla informacje o trybie pracy interfejsu (trunk/access, voice VLAN, pruning)}
+\cmde{show interface [\textit{nazwa\_interfejsu}] status}{Wyświetla listę (interfejs) ze statusem, numerem VLAN (ewentualnie trunk), duplex, prędkość i typ}
+\cmde{vlan database}{Wchodzi w tryb konfiguracji bazy danych VLAN}
 
 \subsection{VTP (\textit{Virtual Trunking Protocol})}
 VTP pracuje w trzech trybach:

@@ -1,4 +1,4 @@
-\chapter{IPv6}
+\chapter{Lab 76: IPv6}
 \section{Konfiguracja interfejsów}
 \cmdc{config-if}{ipv6 address \textit{adres\_IPv6}/\textit{maska\_podsieci}}{Konfiguracja adresu IPv6}
 \cmdc{config-if}{ipv6 address \textit{adres\_IPv6\_sieci}/\textit{maska\_podsieci} eui-64}{Konfiguracja adresu IPv6 (EUI-64)}
@@ -17,11 +17,11 @@ Wyjątkowo do procesu routowania nie dołączamy sieci (tj. za pomocą polecenia
 
 \subsection{OSPFv3}
 \cmdc{config}{ipv6 router ospf \textit{numer\_procesu}}{Włączenie OSPFv3}
-\cmdc{config-router}{router-id \textit{aaa.bbb.ccc.ddd}}{Konfiguracja OSPF \texttt{router-id} TODO: sprawdzić, czy może być samym numerem}
-\cmdc{config-if}{ipv6 ospf \textit{numer\_procesu} area \textit{aaa.bbb.ccc.ddd}}{Aktywacja OSPFv3 na wybranym interfejsie TODO: sprawdzić, czy może być po prostu liczbą}
+\cmdc{config-router}{router-id \textit{aaa.bbb.ccc.ddd}}{Konfiguracja OSPF \texttt{router-id} (zapis jak adres IPv4, ponieważ jest to wartość 32-bitowa)}
+\cmdc{config-if}{ipv6 ospf \textit{numer\_procesu} area \textit{numer\_obszaru}}{Aktywacja OSPFv3 na wybranym interfejsie}
 
 \subsubsection{Diagnostyka}
-\cmde{show ipv6 protocols}{TODO: sprawdzić}
+\cmde{show ipv6 protocols}{Wyświetlenie stanu protokołów routingu IPv6}
 \cmde{show ipv6 ospf neighbor}{Wyświetlenie informacji o sąsiadach OSPFv3}
 \cmde{show ipv6 ospf interface}{Wyświetlenie informacji o interfejsach pracujących w ramach OSPFv3}
 \cmde{show ipv6 ospf database}{Wyświetlenie bazy wiedzy OSPFv3}
@@ -32,16 +32,16 @@ Wyjątkowo do procesu routowania nie dołączamy sieci (tj. za pomocą polecenia
 
 \subsection{EIGRP}
 \cmdc{config}{ipv6 router eigrp \textit{numer\_AS}}{Włączenie EIGRP}
-\cmdc{config-if}{ipv6 eigrp \textit{numer\_AS}}{Aktywacja EIGRP na wybranym interfejsie TODO: sprawdzić, czy faktycznie podaje się AS}
+\cmdc{config-if}{ipv6 eigrp \textit{numer\_AS}}{Aktywacja EIGRP na wybranym interfejsie}
 
 \section{Diagnostyka}
 \cmde{show ipv6 interface brief}{Wyświetlenie podsumowania konfiguracji interfejsów (IPv6)}
 \cmde{debug ipv6 icmp}{Włączenie debugowania pakietów ICMP IPv6}
 \cmde{traceroute ipv6 \textit{adres\_hosta\_IPv6}}{\texttt{traceroute} w wersji IPv6}
-\cmde{show ipv6 route}{TODO: sprawdzić, na czym polega debugowanie tras}
+\cmde{show ipv6 route}{Wyświetlenie tablicy routingu IPv6}
 
 \section{Tunelowanie IPv6IP}
-TODO: merge z ,,tunele GRE'', DRY
+% TODO: merge z ,,tunele GRE'', DRY
 Tunel jest zwykłym interfejsem warstwy trzeciej -- oprócz konfiguracji podanej poniżej konieczne jest ustalenie wewnętrznej adresacji i skonfigurowanie interfejsu tunelu (tj. nadanie adresu za pomocą \texttt{ipv6 address ...}).
-Konfiguracja identyczna jak w przypadku standardowego tunelu GRE, dodajemy jedynie następujące polecenia:
+Konfiguracja identyczna jak w przypadku standardowego tunelu GRE, dodajemy jedynie następujące polecenie:
 \cmdc{config-if}{tunnel mode ipv6ip}{Ustawienie trybu pracy tunelu na IPv6IP}

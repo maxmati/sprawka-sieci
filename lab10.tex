@@ -1,4 +1,4 @@
-\chapter{IP multicast}
+\chapter{Lab 10: IP multicast}
 \section{IGMP Snooping w przełącznikach Ethernet}
 \cmdc{config}{ip igmp snooping}{Włączenie funkcji IGMP Snooping}
 
@@ -21,6 +21,6 @@ Jeden z routerów pełni rolę \textit{Rendezvous Point} -- przechowuje informac
 \cmdc{config}{ip pim rp-address \textit{adres\_IP\_RP}}{Wskazanie, pod jakim adresem znajduje się \textit{Rendezvous Point}}
 
 \subsection{Diagnostyka}
-\cmde{show ip pim rp}{TODO: sprawdzić}
-\cmde{show ip pim rp mapping}{TODO: sprawdzić}
-\cmde{show ip pim neighbor}{TODO: sprawdzić}
+\cmde{show ip pim rp}{Wyświetla znane RP z powiązanymi trasami routingu multicast}
+\cmde{show ip pim rp mapping}{Wyświetla powiązania grupy PIM (multicast) z RP}
+\cmde{show ip pim neighbor}{Wyświetla znanych sąsiadów PIM (z którymi były wymieniane pakiety query/hello)}

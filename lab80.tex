@@ -2,11 +2,11 @@
 \section{Routing statyczny}
 \cmdc{config}{ip route 0.0.0.0 0.0.0.0 \textit{adres\_IP\_następnego\_skoku}}{Dodawanie bramy domyślnej (ang. \textit{gateway of last resort})}
 \cmdc{config}{ip route \textit{adres\_sieci} \textit{maska\_sieci} \textit{interfejs\_point-to-point} [\textit{dystans\_administracyjny}]}{Dodawanie trasy routingu przechodzącej przez interfejs point-to-point}
-\cmde{clear ip route *}{Kasowanie całej tablicy reguł routowania TODO: sprawdzić, co ze statycznymi wpisami}
+\cmde{clear ip route *}{Czyszczenie tras routingu (kasuje statyczne wpisy); tablica jest populowana ponownie przez procesy routingu}
 \cmdc{config-routers}{redistribute static}{Redystrybucja statycznych tras routingu za pomocą dynamicznego protokołu rutowania}
 
 \section{\texttt{route-map}s i Policy Based Routing}
-Route mapy wewnątrz korzystają z list ACL do klasyfikacji (\texttt{match}owania) ruchu, na którym mają operować. Numer sekwencji ma znaczenie podobne jak przy listach ACL -- rozpatrywane są po kolei (od najmniejszego, do największego numeru sekwencji); spełnienie reguły kończy dalszą klasyfikację. TODO: sprawdzić to
+Route mapy wewnątrz korzystają z list ACL do klasyfikacji (\texttt{match}owania) ruchu, na którym mają operować. Numer sekwencji ma znaczenie podobne jak przy listach ACL -- rozpatrywane są po kolei (od najmniejszego, do największego numeru sekwencji); spełnienie reguły kończy dalszą klasyfikację. Jeżeli żadna reguła nie zostanie dopasowana, ruch jest odrzucany.
 
 \subsection{Konfiguracja \texttt{route-map}y}
 \cmdc{config}{route-map \textit{nazwa\_mapy} \textit{numer\_sekwencji}}{Tworzenie nowej \texttt{route-map}y}
@@ -26,7 +26,8 @@ Route mapy wewnątrz korzystają z list ACL do klasyfikacji (\texttt{match}owani
 
 \section{Rendundancja routerów}
 Routery pracują w dwóch trybach: \textit{active} bądź \textit{standby}.
-Oba protokoły wspierają autentykację. TODO: dodać link do appendix
+Oba protokoły wspierają autentykację.
+% TODO: dodać link do appendix
 
 \subsection{Cisco HSRP -- \textit{Hot Standby Routing Protocol}}
 \cmdc{config-if}{standby \textit{numer\_grupy\_standby} ip \textit{adres\_IP\_standby}}{Ustalenie adresu IP standby (współdzelonego)}
@@ -56,20 +57,20 @@ Oba protokoły wspierają autentykację. TODO: dodać link do appendix
 \subsection{Cisco IOS 12.3}
 \cmdc{config}{ip sla monitor \textit{numer\_opcji\_monitorowania}}{Definiowanie operacji monitorowania}
 \cmdc{config-sla-monitor}{type echo protocol ip icmpEcho \textit{adres\_IP} source-interface \\ \textit{nazwa\_interfejsu\_źródłowego}}{Definiowanie monitorowania hosta poprzez wysyłanie pakietów \textit{ICMP Echo Request} (\texttt{ping})}
-\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Zdefiniowanie czasu, po jakim host zostanie uznany jako niedostępny braku odpowiedzi}
-\cmdc{config-ip-sla}{treshold 2}{TODO: sprawdzić}
-\cmdc{config-ip-sla}{frequency 3}{TODO: sprawdzić}
+\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Maksymalny czas odpowiedzi (w sekundach); jeżeli nie otrzymamy odpowiedzi w zadanym czasie, host uznawany jest jako niedostepny}
+\cmdc{config-ip-sla}{threshold \textit{threshold\_w\_ms}}{Górna granica wartości odpowiedzi}
+\cmdc{config-ip-sla}{frequency \textit{częstotliwość\_w\_s}}{Częstotliwość wykonywania zapytania}
 \cmdc{config}{ip sla monitor schedule \textit{numer\_opcji\_monitorowania} life forever start-time now}{Uruchomienie monitorowania}
 
 \subsection{Od Cisco IOS 12.4}
 \cmdc{config}{ip sla \textit{numer\_opcji\_monitorowania}}{Definiowanie operacji monitorowania}
 \cmdc{config-sla-monitor}{icmp-echo \textit{adres\_IP} source-interface \textit{nazwa\_interfejsu\_źródłowego}}{Definiowanie monitorowania hosta poprzez wysyłanie pakietów \textit{ICMP Echo Request} (\texttt{ping})}
-\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Zdefiniowanie czasu, po jakim host zostanie uznany jako niedostępny braku odpowiedzi}
-\cmdc{config-ip-sla}{treshold 2}{TODO: sprawdzić}
-\cmdc{config-ip-sla}{frequency 3}{TODO: sprawdzić}
+\cmdc{config-ip-sla}{timeout \textit{czas\_timeout}}{Maksymalny czas odpowiedzi (w sekundach); jeżeli nie otrzymamy odpowiedzi w zadanym czasie, host uznawany jest jako niedostepny}
+\cmdc{config-ip-sla}{threshold \textit{threshold\_w\_ms}}{Górna granica wartości odpowiedzi}
+\cmdc{config-ip-sla}{frequency \textit{częstotliwość\_w\_s}}{Częstotliwość wykonywania zapytania}
 \cmdc{config}{ip sla schedule \textit{numer\_opcji\_monitorowania} life forever start-time now }{Uruchomienie monitorowania}
 
 \subsection{Use case: konfiguracja bramy w zależności od dostępności hosta}
 Konfigurowany jest tzw. RTR -- \textit{Response Time Reporter}. Oprócz trasy zdefiniowanej poniżej powinna istnieć inna, o \textbf{wyższej} metryce -- gdy host jest dostępny, brana jest trasa z parametrem \texttt{track} (o niższej metryce -- preferowana); w przeciwnym wypadku: ta z wyższą metryką.
 \cmdc{config}{track \textit{numer\_obiektu\_śledzenia} rtr \textit{numer\_opcji\_monitorowania} reachability}{Konfiguracja reakcji na zdarzenie}
-\cmdc{config TODO: sprawdzić}{ip route 0.0.0.0 0.0.0.0 \textit{adres\_IP\_bramy} track \textit{metryka\_gdy\_dostępny}}{Dodanie domyślnej trasy routingu gdy host jest dostępny}
+\cmdc{config}{ip route 0.0.0.0 0.0.0.0 \textit{adres\_IP\_bramy} track \textit{metryka\_gdy\_dostępny}}{Dodanie domyślnej trasy routingu gdy host jest dostępny}

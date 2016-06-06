@@ -54,7 +54,7 @@ Dostęp do linii może być zarządzany poprzez przypisanie listy ACL (standardo
 	\item Root ID -- identyfikator przełącznika, będącego korzeniem,
 	\item Bridge ID -- identyfikator bieżącego przełącznika,
 	\item root port -- port, który z bieżącego przełącznika prowadzi do korzenia -- w górę drzewa (nie występuje w korzeniu),
-	\item designated ports -- porty odpowiedzialne za przekazywanie ruchu w dół drzewa (TODO: zrobić rozeznanie definicji),
+	\item designated ports -- porty odpowiedzialne za przekazywanie ruchu w dół drzewa,
 	\item alternative ports -- (dla PVST i RSTP) -- porty prowadzące do korzenia, nie będące najlepszym wariantem,
 	\item BPDU -- \textit{Bridge Protocol Data Unit} -- rozgłaszane ramki STP.
 \end{itemize}
@@ -85,12 +85,12 @@ Kolejność wyboru \textit{root port}: 1. koszt (niższy wygrywa), 2. przysłany
 \cmdc{config-if}{spanning-tree guard root}{Zablokowanie statusu \textit{root bridge} -- blokada portu przy próbie przejęcia roli korzenia przez inny przełącznik}
 
 \subsection{Diagnostyka}
-\cmde{show spanning-tree}{TODO: sprawdzić, co wyświetla}
-\cmde{show spanning-tree summary}{TODO: sprawdzić, czym się różni od powyższego}
-\cmde{show spanning-tree detail}{TODO: sprawdzić, czym się różni od powyższego}
+\cmde{show spanning-tree}{Wyświetla informacje o stanie STP: rodzaj protokołu; adres, koszt, port, hello interval dla korzenia; informacje o nas, sąsiadów -- port pod jakim są dostepni, rolę (root, alternative), status (FWD, BLK etc.)}
+\cmde{show spanning-tree summary}{Informacje o rodzaju STP (globalnie dla urządzenia), \texttt{bpdu-guard}, \textit{bpdu-filter}; podsumowanie liczby portów będących w danym stanie per-VLAN}
+\cmde{show spanning-tree detail}{Informacje o każdym gnieździe z osobna}
 \cmde{show spanning-tree vlan \textit{numer\_VLAN} [detail])}{Wyświetlanie stanu STP dla wybranych VLAN}
 \cmde{show spanning-tree vlan \textit{pierwszy\_VLAN}-\textit{ostatni\_VLAN}}{Wyświetlanie stanu STP dla wybranych VLAN}
-\cmde{show spanning-tree vlan \textit{numer\_VLAN} interface \textit{numer\_interfejsu}) [detail]}{Wyświetlanie stanu STP dla wybranego interfejsu (TODO: sprawdzić, gdzie występuje parametr detail)}
+\cmde{show spanning-tree vlan \textit{numer\_VLAN} interface \textit{numer\_interfejsu}) [detail]}{Wyświetlanie stanu STP dla wybranego interfejsu}
 
 \subsubsection{Debugowanie}
 \cmde{debug spanning-tree events}{Wyświetlanie komunikatów zdarzeń STP}

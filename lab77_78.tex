@@ -1,0 +1,47 @@
+\chapter{Lab 77, 78: BGP -- \textit{Border Gateway Protocol}}
+\cmdc{config}{router bgp \textit{numer\_AS}}{Wejście w tryb konfiguracji BGP}
+\cmdc{config-router}{bgp router-id \textit{aaa.bbb.ccc.ddd}}{Konfiguracja BGP \texttt{router-id}}
+\cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada} remote-as \textit{numer\_AS}}{Rejestrowanie sąsiada BGP}
+\cmdc{config-router}{network \textit{adres\_sieci} [netmask \textit{maska\_podsieci}]}{Włączenie sieci do procesu routingu}
+\cmdc{config-router}{no synchronization}{Wyłączenie synchronizacji z protokołami IGP -- wyłączenie oczekiwania na zestawienie ścieżki przez protokoły IGP; można wpisać, gdy nie jesteśmy multihomed}
+\cmdc{config-router}{no auto-summary}{Wyłączenie automatycznego uogólniania tras (supernettingu)}
+
+\section{Manipulowanie atrybutami tras eBGP}
+Atrybuty modyfikujemy poprzez \texttt{route-map}s.
+\cmdc{config}{route-map \textit{nazwa\_mapy}}{Tworzenie nowej \texttt{route-map}}
+\cmdc{config-route-map}{set metric \textit{metryka}}{Modyfikacja wartości metryki}
+\cmdc{config-route-map}{set origin incomplete}{Zadeklarowanie źródła jako spoza protokołu routingu}
+\cmdc{config-route-map}{set local-preference \textit{wartość\_parametru}}{Modyfikacja \texttt{local-preference} (nie eksportuje się!)}
+\cmdc{config-route-map}{set weight \textit{waga}}{Modyfikacja \texttt{weight} (nie eksportuje się!)}
+\cmdc{config-route-map}{set as-path prepend \textit{numer\_AS1} \textit{numer\_AS2} ...}{Dodanie dodatkowych AS do trasy (z przodu ścieżki)}
+
+\section{Filtrowanie tras eBGP}
+\cmdc{config}{ip as-path access-list \textit{numer\_listy\_ACL} deny \_\textit{numer\_AS}\_}{Filtrowanie tras przechodzących przez zadany AS}
+\cmdc{config}{ip as-path access-list \textit{numer\_listy\_ACL} permit \$\^}{Wydanie zezwolenie na pozostałe (dowolne) trasy}
+\cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada} filter-list \textit{numer\_listy\_ACL} \{in, out\}}{Aplikacja filtra tras na zadanym sąsiedzie}
+
+\subsection{Aplikacja \texttt{route-map}y}
+\texttt{route-map}ę możemy zastosować do naszej sieci, sąsiada dla danych wysłanych i (osobno) odbieranych.
+\cmdc{config-router}{network \textit{adres\_IP\_sieci} route-map \textit{nazwa\_mapy}}{Modyfikacja atrybutów tras wychodzących z tej sieci}
+\cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada} route-map \textit{nazwa\_mapy} \{in, out\}}{Modyfikacja atrybutów przychodzących/wychodzących z/do sąsiada}
+
+\section{Techniki skalowania iBGP}
+\subsection{\textit{Route Reflector}}
+Po wprowadzeniu sąsiada deklarujemy, że jest klientem RR.
+\cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada} router-reflector-client}{Zadeklarowanie, że sąsiad jest klientem RR}
+\cmdc{config-router}{bgp cluster \textit{identyfikator\_klastra}}{Definiowanie klastra RR (w przypadku, że istnieje więcej, niż jeden RR)}
+
+\subsection{\textit{AS Confederations}}
+\cmdc{config-router}{bgp confederation identifier \textit{numer\_AS\_zewnętrzny}}{Zgłoszenie routera z konfederacji do innych AS}
+\cmdc{config-router}{bgp confederation peers \textit{numer\_innego\_AS\_w\_konfederacji}}{Zgłoszenie innych AS będących w konfederacji}
+
+% TODO: dokończyć zadanie D
+
+\section{Diagnostyka}
+\cmde{show ip bgp}{Wyświetla podsumowanie stanu BGP (listę wpisów tablicy routowania BGP)}
+\cmde{show ip bgp neighbors}{Wyświetlenie sąsiadów BGP}
+
+\cmde{show ip protocols}{Wyświetla informacje uruchomionych protokołów routingu}
+\cmde{show ip bgp update-group}{Wyświetlanie \texttt{update-group}s -- grup sąsiadów, którzy otrzymują te same aktualizacje}
+\cmde{clear ip bgp *}{Wyczyszczenie sesji BGP}
+\cmde{debug ip bgp}{Włączenie debugowania sesji BGP}

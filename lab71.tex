@@ -1,4 +1,4 @@
-\chapter{Lab 71: IGP -- \textit{Interior Gateway Protocol}s, tunele GRE (TODO: tunele osobno)}
+\chapter{Lab 71: IGP -- \textit{Interior Gateway Protocol}s, tunele GRE}
 \section{Polecenia ogólne}
 \cmdc{config}{ip routing}{Włączenie routingu IP}
 \cmdc{config}{ip classless}{Włączenie routingu bezklasowego}
@@ -38,7 +38,7 @@ Domyślne interwały \texttt{hello-time}: 10 sekund dla sieci typu broadcast ora
 \cmdc{config}{router ospf \textit{numer\_procesu}}{Wejście w tryb konfiguracji OSPF}
 \cmdc{config-router}{network \textit{adres\_sieci} \textit{odwrócona\_maska} area \textit{numer\_obszaru}}{Włączenie sieci do procesu routingu}
 \cmdc{config-router}{neighbor \textit{adres\_IP\_sąsiada}}{Rejestrowanie sąsiada OSPF (konieczne w przypadku sieci \textit{Non-Broadcast Multiple Access})}
-\cmdc{config-router}{log-adjacency-changes}{Wyświetlaj komunikaty o zmianie sąsiadów TODO: sprawdzić}
+\cmdc{config-router}{log-adjacency-changes}{Włącza przesyłanie komunikatów do \texttt{syslog}u podczas zmiany stanu sąsiada}
 
 \subsection{Ustawienia pojedynczego interfejsu}
 \cmdc{config-if}{ip ospf priority \textit{priorytet}}{Ustawienie priorytetu przy wyborze roli (DR, BDR) dla sieci typu broadcast (domyślnie 1) -- wyższa wartość wygrywa}
@@ -55,10 +55,10 @@ Konfigurujemy, gdy router nie ma bezpośredniego dostępu do szkieletu -- tranzy
 \subsection{Diagnostyka}
 \cmde{show ip ospf interface \textit{numer\_interfejsu}}{Wyświetlenie informacji OSPF dotyczących wybranego interfejsu}
 \cmde{show ip ospf neighbor}{Wyświetlenie bazy sąsiadów OSPF}
-\cmde{show ip ospf border-routers}{Wyświetlenie routerów ABR TODO: sprawdzić}
+\cmde{show ip ospf border-routers}{Wyświetlenie routerów ABR, ASBR}
 
 \subsubsection{Debugowanie}
-\cmde{debug ip ospf adjacency}{Debugowanie zmian adjacencji (sąsiadów) TODO: sprawdzić}
+\cmde{debug ip ospf adjacency}{Debugowanie zmian adjacencji (sąsiadów)}
 \cmde{debug ip ospf events}{Debugowanie wydarzeń}
 
 \section{Redystrybucja tras}
@@ -86,6 +86,6 @@ Tunelowanie powoduje nadanie dodatkowego narzutu (nagłówków GRE), efektywnie 
 
 \section{Diagnostyka}
 \cmde{show ip route}{Wyświetlenie tablicy routingu}
-\cmde{show ip protocols}{TODO: sprawdzić}
+\cmde{show ip protocols}{Wyświetla informacje uruchomionych protokołów routingu}
 \cmde{debug ip routing}{Włączenie debugowania routingu}
-\cmde{clear ip route *}{Czyszczenie danych routingu protokołów dynamicznych TODO: sprawdzić, czy kasuje statyczne wpisy}
+\cmde{clear ip route *}{Czyszczenie tras routingu (kasuje statyczne wpisy); tablica jest populowana ponownie przez procesy routingu}
